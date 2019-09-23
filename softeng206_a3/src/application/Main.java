@@ -24,7 +24,7 @@ public class Main extends Application {
 			_thisStage = primaryStage;
 
 			BorderPane root = new BorderPane();
-			Scene scene = new Scene(root, 400, 400);
+			Scene scene = new Scene(root, 750, 750);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
 			//Generate Screens
@@ -70,21 +70,22 @@ public class Main extends Application {
 		VBox mainMenu = new VBox(4);
 		mainMenu.setAlignment(Pos.CENTER);
 		mainMenu.getChildren().addAll(mainMenuInfo, viewBtn, createBtn);
-		this._mainMenu = new Scene(mainMenu, 500, 400);
+		this._mainMenu = new Scene(mainMenu, 750, 750);
 	}
 
 	public void generateView(){
-		BorderPane viewMenu = new BorderPane();
-		TextArea text = new TextArea();
-		viewMenu.setTop(text);
-
-		this._viewMenu = new Scene(viewMenu, 500, 400);
+		viewScene tempView = new viewScene(this);
+		_viewMenu = tempView.getScene();
 
 	}
 
 	public void generateCreate(){
 		//create the creation menu here
 
+	}
+
+	public void returnToMain(){
+		_thisStage.setScene(_mainMenu);
 	}
 
 }
