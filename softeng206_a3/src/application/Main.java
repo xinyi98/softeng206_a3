@@ -17,6 +17,8 @@ public class Main extends Application {
 	private Stage _thisStage;
 	private Scene _mainMenu, _viewMenu, _createMenu;
 
+	private viewScene _viewControl;
+
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -57,6 +59,7 @@ public class Main extends Application {
 		viewBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent actionEvent) {
+				_viewControl.refreshList();
 				_thisStage.setScene(_viewMenu);
 			}
 		});
@@ -74,8 +77,8 @@ public class Main extends Application {
 	}
 
 	public void generateView(){
-		viewScene tempView = new viewScene(this);
-		_viewMenu = tempView.getScene();
+		_viewControl = new viewScene(this);
+		_viewMenu = _viewControl.getScene();
 
 	}
 

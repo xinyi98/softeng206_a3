@@ -1,5 +1,7 @@
 package application;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -13,12 +15,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 
-import java.io.File;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class viewScene {
     private Scene _viewScene;
     private application.Main _stage;
     private String _path;
+    private ListView<String> _list;
 
     public viewScene(Main stage){
         _stage = stage;
@@ -34,6 +39,7 @@ public class viewScene {
         VBox options = new VBox(4);
         Button playBtn = new Button("Play");
         Button deleteBtn = new Button("Delete");
+        Button refreshBtn = new Button("Refresh");
 
         VBox deleteOptions = new VBox(4);
         Label confirmMsg = new Label("Are you sure you want to do this?");
@@ -46,12 +52,13 @@ public class viewScene {
         listViewTitle.setTextAlignment(TextAlignment.CENTER);
         listViewTitle.setTextAlignment(TextAlignment.CENTER);
 
-        ListView creationList = new ListView();
-        creationList.setOrientation(Orientation.VERTICAL);
+        _list = new ListView<String>();
+        _list.setOrientation(Orientation.VERTICAL);
 
-        viewMenuHolder.getChildren().addAll(listViewTitle, creationList);
+
+        viewMenuHolder.getChildren().addAll(listViewTitle, _list);
         viewMenuHolder.setAlignment(Pos.CENTER);
-        options.getChildren().addAll(playBtn, deleteBtn);
+        options.getChildren().addAll(playBtn, deleteBtn, refreshBtn);
         options.setAlignment(Pos.CENTER);
 
         Button viewBackBtn = new Button("Back");
@@ -70,7 +77,7 @@ public class viewScene {
             @Override
             public void handle(ActionEvent actionEvent) {
                 try {
-                    String selectedFile = creationList.getSelectionModel().getSelectedItem().toString();
+                    String selectedFile = _list.getSelectionModel().getSelectedItem().toString();
 
                     String cmd = "ffplay -autoexit " + selectedFile + ".mp4 &> /dev/null";
                     ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
@@ -88,6 +95,19 @@ public class viewScene {
             public void handle(ActionEvent actionEvent) {
                 try {
                     viewMenu.setBottom(deleteOptions);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+        refreshBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                try {
+                    refreshList();
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -127,5 +147,30 @@ public class viewScene {
 
     public Scene getScene(){
         return _viewScene;
+    }
+
+    public List<String> getNameList(){
+        try {
+            String cmd = "ls " + _path + "/" + " | grep mp4 | sort | cut -f1 -d'.'";
+            ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
+            Process process = builder.start();
+            InputStream stdout = process.getInputStream();
+            BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+            List<String> fileNames = new ArrayList<String>();
+            String line = null;
+            while ((line = stdoutBuffered.readLine()) != null) {
+                fileNames.add(line);
+            }
+            return fileNames;
+        }
+        catch (IOException e){
+            return null;
+        }
+    }
+
+    public void refreshList(){
+        List<String> fileNames = getNameList();
+        ObservableList<String> items = FXCollections.observableList(fileNames);
+        _list.setItems(items);
     }
 }
