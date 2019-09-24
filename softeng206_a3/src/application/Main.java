@@ -91,4 +91,8 @@ public class Main extends Application {
 		_thisStage.setScene(_mainMenu);
 	}
 
+	public void goToView(){
+		_thisStage.setScene(_viewMenu);
+	}
+
 }

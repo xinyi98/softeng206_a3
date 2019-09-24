@@ -7,10 +7,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
@@ -21,6 +18,7 @@ import java.util.List;
 
 public class viewScene {
     private Scene _viewScene;
+    private playScene _playController;
     private application.Main _stage;
     private String _path;
     private ListView<String> _list;
@@ -31,6 +29,8 @@ public class viewScene {
         String users_home = System.getProperty("user.home");
         _path = users_home.replace("\\", "/") + File.separator + myDirectory;
         generateView();
+        _playController = new playScene(_path, _stage);
+
     }
 
     public void generateView(){
@@ -41,20 +41,12 @@ public class viewScene {
         Button deleteBtn = new Button("Delete");
         Button refreshBtn = new Button("Refresh");
 
-        VBox deleteOptions = new VBox(4);
-        Label confirmMsg = new Label("Are you sure you want to do this?");
-        Button cancelBtn = new Button("Cancel");
-        Button confirmBtn = new Button("Confirm");
-        deleteOptions.getChildren().addAll(confirmMsg, cancelBtn, confirmBtn);
-        deleteOptions.setAlignment(Pos.CENTER);
-
         Label listViewTitle = new Label("Creations:");
         listViewTitle.setTextAlignment(TextAlignment.CENTER);
         listViewTitle.setTextAlignment(TextAlignment.CENTER);
 
         _list = new ListView<String>();
         _list.setOrientation(Orientation.VERTICAL);
-
 
         viewMenuHolder.getChildren().addAll(listViewTitle, _list);
         viewMenuHolder.setAlignment(Pos.CENTER);
@@ -78,10 +70,13 @@ public class viewScene {
             public void handle(ActionEvent actionEvent) {
                 try {
                     String selectedFile = _list.getSelectionModel().getSelectedItem().toString();
+                    _playController.generatePlay(selectedFile);
+                    _stage.switchScene(_playController.getScene());
 
-                    String cmd = "ffplay -autoexit " + selectedFile + ".mp4 &> /dev/null";
-                    ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
-                    Process process = builder.start();
+
+//                    String cmd = "ffplay -autoexit " + _path + "/" + selectedFile + ".mp4 &> /dev/null";
+//                    ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
+//                    Process process = builder.start();
                 }
                 catch (Exception e){
                     e.printStackTrace();
@@ -94,7 +89,17 @@ public class viewScene {
             @Override
             public void handle(ActionEvent actionEvent) {
                 try {
-                    viewMenu.setBottom(deleteOptions);
+                    String selection = _list.getSelectionModel().getSelectedItem().toString();
+
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + selection + " ?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+                    alert.showAndWait();
+
+                    if (alert.getResult() == ButtonType.YES) {
+                        String cmd = "rm -f " + _path + "/" + selection + ".mp4";
+                        ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
+                        Process process = builder.start();
+                        refreshList();
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -110,31 +115,6 @@ public class viewScene {
                     refreshList();
 
                 } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
-
-        confirmBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent){
-                try {
-//                    String selectedFile = creationList.getSelectionModel().getSelectedItem().toString();
-//
-//                    String cmd = "rm " + selectedFile + ".mp4 &> /dev/null";
-//                    System.out.println(selectedFile);
-//                    ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
-//                    Process process = builder.start();
-//
-//                    list.remove(creationList.getSelectionModel().getSelectedItem());
-//                    creationList.getItems().clear();
-//                    creationList.getItems().addAll(list);
-//
-//                    viewMenu.setBottom(options);
-
-                }
-                catch (Exception e) {
                     e.printStackTrace();
                 }
 
