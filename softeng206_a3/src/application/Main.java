@@ -1,5 +1,7 @@
 package application;
 
+import java.io.File;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -21,8 +23,14 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+			
+			//make a directory in user's home directory called "206a3_team17" to store all the files created 
+			String myDirectory = "206a3_team17"; 
+			String users_home = System.getProperty("user.home");
+			String path = users_home.replace("\\", "/") + File.separator + myDirectory;
+			new File(path).mkdir();
+			
 			_thisStage = primaryStage;
-
 			BorderPane root = new BorderPane();
 			Scene scene = new Scene(root, 400, 400);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
@@ -83,7 +91,10 @@ public class Main extends Application {
 	}
 
 	public void generateCreate(){
+		
 		//create the creation menu here
+		SearchScene searchScene = new SearchScene();
+		this._createMenu = searchScene.SwichToSearchScene();
 
 	}
 
