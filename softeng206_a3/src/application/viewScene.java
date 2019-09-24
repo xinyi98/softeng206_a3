@@ -73,10 +73,6 @@ public class viewScene {
                     _playController.generatePlay(selectedFile);
                     _stage.switchScene(_playController.getScene());
 
-
-//                    String cmd = "ffplay -autoexit " + _path + "/" + selectedFile + ".mp4 &> /dev/null";
-//                    ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
-//                    Process process = builder.start();
                 }
                 catch (Exception e){
                     e.printStackTrace();
