@@ -2,40 +2,48 @@ package application;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 
 public class SearchScene {
 
 	private String _keyword;
 	private String _path;
-	private boolean _isFinished;
-	private boolean _backToMain;
 	private Main _stage;
+	private List<String> _fileNames;
+	private AudioScene _audioScene;
+	private Scene _audioMenu;
 
 	// default constructor
 	public SearchScene(Main stage) {
 		_stage = stage;
 		String myDirectory = "206a3_team17"; // user Folder Name
 		String users_home = System.getProperty("user.home");
-		this._path = users_home.replace("\\", "/") + File.separator + myDirectory;
-		this._isFinished = false;
-		this._backToMain = false;
+		_path = users_home.replace("\\", "/") + File.separator + myDirectory;
+		
 
 	}
 
@@ -43,13 +51,14 @@ public class SearchScene {
 	public Scene getScene() {
 
 		BorderPane root = new BorderPane();
-		Scene SearchScene = new Scene(root, 750, 750);
+		Scene searchScene = new Scene(root, 750, 750);
 
 		// add the button "back to main menu"
 		Button BackBtn = new Button("Back To Main Menu");
 		BackBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				_stage.clearFolder(_path);
 				_stage.returnToMain();
 			}
 		});
@@ -76,9 +85,9 @@ public class SearchScene {
 					alert.showAndWait();
 
 				} else {
-					WikiSearch ws = new WikiSearch(ToSearch);
-					Thread thread = new Thread(ws);
-					thread.start();
+					
+
+					
 					_keyword = ToSearch;
 					_stage.setKeyword(_keyword);
 
@@ -133,7 +142,10 @@ public class SearchScene {
 									/**
 									 * go to the next scene -- create audio
 									 */
-									_isFinished = true;
+									_audioScene = new AudioScene(_stage);
+									_audioMenu = _audioScene.getScene();
+									_stage.switchScene(_audioMenu);
+									
 								}
 							}
 
@@ -153,10 +165,37 @@ public class SearchScene {
 
 		CreateBtn.setOnAction(event);
 
+		
+		
+		// show the list of existing creation
+		try {
+			String cmd = "ls " + _path + "/" + " | grep mp4 | sort | cut -f1 -d'.'";
+			ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+			Process process = pb.start();
+			InputStream stdout = process.getInputStream();
+			BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+			List<String> fileNames = new ArrayList<String>();
+			String line = null;
+			while ((line = stdoutBuffered.readLine()) != null) {
+				fileNames.add(line);
+			}
+			_fileNames = fileNames;
+		} catch (IOException e) {
+		
+		}
+		
+		ListView<String> list = new ListView<String>();
+		ObservableList<String> items = FXCollections.observableList(_fileNames);
+		list.setItems(items);
+		list.setOrientation(Orientation.VERTICAL);
+		list.setPrefWidth(200);
+		list.setPrefHeight(50);
+		HBox hbox = new HBox(list);
+		
+		root.setRight(hbox);
 		root.setTop(BackBtn);
 		root.setBottom(CreateBtn);
-
-		return SearchScene;
+		return searchScene;
 	}
 
 	
