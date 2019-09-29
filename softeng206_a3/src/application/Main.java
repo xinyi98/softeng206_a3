@@ -15,7 +15,7 @@ import javafx.scene.layout.BorderPane;
 
 public class Main extends Application {
 	private Stage _thisStage;
-	private Scene _mainMenu, _viewMenu, _createMenu;
+	private Scene _mainMenu, _viewMenu, _createMenu, _createVideoScene;
 
 	private viewScene _viewControl;
 
@@ -33,6 +33,9 @@ public class Main extends Application {
 			generateMain();
 			generateView();
 			generateCreate();
+			//tester
+            generateCreateVideo();
+
 
 
 			primaryStage.setTitle("VARpedia");
@@ -67,7 +70,7 @@ public class Main extends Application {
 		createBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent actionEvent) {
-                _thisStage.setScene(_createMenu);
+			    _thisStage.setScene(_createMenu);
 			}
 		});
 		VBox mainMenu = new VBox(4);
@@ -94,5 +97,11 @@ public class Main extends Application {
 	public void goToView(){
 		_thisStage.setScene(_viewMenu);
 	}
+
+	//tester
+    public void generateCreateVideo(){
+	    createVideoScene createVideoControl = new createVideoScene(this);
+	    _createMenu = createVideoControl.getScene();
+    }
 
 }
