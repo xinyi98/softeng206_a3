@@ -26,10 +26,16 @@ import javafx.scene.layout.BorderPane;
 public class Main extends Application {
 	private Stage _thisStage;
 	private Scene _mainMenu, _viewMenu, _createMenu;
+<<<<<<< HEAD
 	private SearchScene _searchScene;
 	private String _keyword;
 	private String _path;
 	private String _audio;
+=======
+
+	private viewScene _viewControl;
+
+>>>>>>> master
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -84,7 +90,11 @@ public class Main extends Application {
 		viewBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent actionEvent) {
+<<<<<<< HEAD
 				generateView();
+=======
+				_viewControl.refreshList();
+>>>>>>> master
 				_thisStage.setScene(_viewMenu);
 			}
 		});
@@ -105,12 +115,18 @@ public class Main extends Application {
 		this._mainMenu = new Scene(mainMenu, 750, 750);
 	}
 
+<<<<<<< HEAD
 	public void generateView() {
 		BorderPane viewMenu = new BorderPane();
 		TextArea text = new TextArea();
 		viewMenu.setTop(text);
 
 		this._viewMenu = new Scene(viewMenu, 500, 400);
+=======
+	public void generateView(){
+		_viewControl = new viewScene(this);
+		_viewMenu = _viewControl.getScene();
+>>>>>>> master
 
 	}
 
@@ -125,6 +141,7 @@ public class Main extends Application {
 		_thisStage.setScene(_mainMenu);
 	}
 
+<<<<<<< HEAD
 	public void clearFolder(String path) {
 
 		// delete all the .txt and .wav files
@@ -170,4 +187,14 @@ public class Main extends Application {
 		fw2.close();
 
 	}
+=======
+	public void returnToMain(){
+		_thisStage.setScene(_mainMenu);
+	}
+
+	public void goToView(){
+		_thisStage.setScene(_viewMenu);
+	}
+
+>>>>>>> master
 }

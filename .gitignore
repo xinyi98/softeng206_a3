@@ -1,11 +1,18 @@
 /bin/
+<<<<<<< HEAD
 
 .classpath
 
 .project
 
 
+=======
+>>>>>>> master
 .idea/
 206_ass3.iml
 out/
 ass3.iml
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
