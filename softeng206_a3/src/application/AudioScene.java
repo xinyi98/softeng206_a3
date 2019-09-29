@@ -232,7 +232,7 @@ public class AudioScene {
 		Settings.setMaxWidth(650);
 		TextInputDialog td = new TextInputDialog();
 		td.setHeaderText("Enter a name for this");
-		td.getDialogPane().lookupButton(ButtonType.CANCEL).setDisable(true);
+		td.getDialogPane().lookupButton(ButtonType.CANCEL).setVisible(false);
 
 		// list of existing audio files
 		refreshList();
@@ -269,6 +269,7 @@ public class AudioScene {
 					count++;
 				}
 				if (count > 1) {
+					
 					td.showAndWait();
 					String AudioName = td.getEditor().getText();
 
