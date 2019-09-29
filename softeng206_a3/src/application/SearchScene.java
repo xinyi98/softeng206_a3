@@ -77,91 +77,98 @@ public class SearchScene {
 		EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				// show the text input dialog
-				td.showAndWait();
-				String ToSearch = td.getEditor().getText();
+				
+				//td.showAndWait();
+				Optional<String> result = td.showAndWait();
+				if (result.isPresent()){
+					//String ToSearch = td.getEditor().getText();
+					String ToSearch = td.getEditor().getText();
+					if (ToSearch.isEmpty() || ToSearch.trim().isEmpty()) {
 
-				if (ToSearch.isEmpty() || ToSearch.trim().isEmpty()) {
+						// show alert
+						Alert alert = new Alert(AlertType.ERROR);
+						alert.setTitle("Error Dialog");
+						alert.setContentText("please enter a valid input!");
+						alert.showAndWait();
 
-					// show alert
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("Error Dialog");
-					alert.setContentText("please enter a valid input!");
-					alert.showAndWait();
+					} else {
+						
+						_keyword = ToSearch;
+						_stage.setKeyword(_keyword);
 
-				} else {
-					
-					_keyword = ToSearch;
-					_stage.setKeyword(_keyword);
+						// multi threads
+						WikiSearch task = new WikiSearch(ToSearch);
 
-					// multi threads
-					WikiSearch task = new WikiSearch(ToSearch);
+						// when the thread is running
+						task.setOnRunning((succeesesEvent) -> {
+							Label b = new Label("Searching...please wait");
+							// create a Stack pane
+							StackPane r = new StackPane();
+							// add password field
+							r.getChildren().add(b);
+							root.setLeft(r);
+							// disable the button for creation
+							CreateBtn.setDisable(true);
+						});
 
-					// when the thread is running
-					task.setOnRunning((succeesesEvent) -> {
-						Label b = new Label("Searching...please wait");
-						// create a Stack pane
-						StackPane r = new StackPane();
-						// add password field
-						r.getChildren().add(b);
-						root.setLeft(r);
-						// disable the button for creation
-						CreateBtn.setDisable(true);
-					});
+						progressBar.progressProperty().bind(task.progressProperty());
+						root.setCenter(progressBar);
+						progressBar.setPrefWidth(100);
 
-					progressBar.progressProperty().bind(task.progressProperty());
-					root.setCenter(progressBar);
-					progressBar.setPrefWidth(100);
+						// when the thread finished its task
+						task.setOnSucceeded((succeededEvent) -> {
+							try {
+								CreateBtn.setDisable(false);
 
-					// when the thread finished its task
-					task.setOnSucceeded((succeededEvent) -> {
-						try {
-							CreateBtn.setDisable(false);
+								String cmd = "cat " + _path + "/" + "textFromWiki.txt";
+								ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+								Process process = pb.start();
+								InputStream stdout = process.getInputStream();
+								BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+								String line = stdoutBuffered.readLine();
+								String temp = _keyword + " not found :^(";
 
-							String cmd = "cat " + _path + "/" + "textFromWiki.txt";
-							ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
-							Process process = pb.start();
-							InputStream stdout = process.getInputStream();
-							BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-							String line = stdoutBuffered.readLine();
-							String temp = _keyword + " not found :^(";
+								progressBar.progressProperty().unbind();
+								progressBar.setProgress(0);
 
-							progressBar.progressProperty().unbind();
-							progressBar.setProgress(0);
-
-							if (line.equals(temp)) {
-								// invalid input -- show alert
-								Alert a = new Alert(AlertType.NONE);
-								a.setAlertType(AlertType.ERROR);
-								a.setContentText("NO RESULT (please enter a valid input!)");
-								a.show();
-							} else {
-								// show that is a valid input
-								Alert alert = new Alert(AlertType.CONFIRMATION, "Searching is done, want to continue?",
-										ButtonType.YES, ButtonType.CANCEL);
-								
-								alert.showAndWait();
-								if (alert.getResult() == ButtonType.YES) {
-									/**
-									 * go to the next scene -- create audio
-									 */
-									_audioScene = new AudioScene(_stage);
-									_audioMenu = _audioScene.getScene();
-									_stage.switchScene(_audioMenu);
+								if (line.equals(temp)) {
+									// invalid input -- show alert
+									Alert a = new Alert(AlertType.NONE);
+									a.setAlertType(AlertType.ERROR);
+									a.setContentText("NO RESULT (please enter a valid input!)");
+									a.show();
+								} else {
+									// show that is a valid input
+									Alert alert = new Alert(AlertType.CONFIRMATION, "Searching is done, want to continue?",
+											ButtonType.YES, ButtonType.CANCEL);
 									
+									alert.showAndWait();
+									if (alert.getResult() == ButtonType.YES) {
+										/**
+										 * go to the next scene -- create audio
+										 */
+										_audioScene = new AudioScene(_stage);
+										_audioMenu = _audioScene.getScene();
+										_stage.switchScene(_audioMenu);
+										
+									}
 								}
+
+							} catch (Exception e1) {
+								e1.printStackTrace();
 							}
 
-						} catch (Exception e1) {
-							e1.printStackTrace();
-						}
+						});
 
-					});
+						ExecutorService executorService = Executors.newFixedThreadPool(1);
+						executorService.execute(task);
+						executorService.shutdown();
+					}
 
-					ExecutorService executorService = Executors.newFixedThreadPool(1);
-					executorService.execute(task);
-					executorService.shutdown();
+				    
 				}
-
+				
+				
 			}
 		};
 
