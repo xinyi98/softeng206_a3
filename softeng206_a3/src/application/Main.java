@@ -2,6 +2,7 @@ package application;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,12 +37,12 @@ public class Main extends Application {
 			// the files created
 			String myDirectory = "206a3_team17";
 			String users_home = System.getProperty("user.home");
-			String _path = users_home.replace("\\", "/") + File.separator + myDirectory;
+		     _path = users_home.replace("\\", "/") + File.separator + myDirectory;
 			new File(_path).mkdir();
 
-			/**
-			 * need to clear every thing unnecessary generated before
-			 */
+			// generate .scm file for festival
+			GenerateScm();
+			
 
 			_thisStage = primaryStage;
 			BorderPane root = new BorderPane();
@@ -52,7 +53,17 @@ public class Main extends Application {
 			generateMain();
 
 			primaryStage.setTitle("VARpedia");
-			primaryStage.setScene(_mainMenu);
+
+			// ...............
+
+			AudioScene test = new AudioScene(this);
+			Scene testScene = test.getScene();
+			primaryStage.setScene(testScene);
+
+			// ..........
+
+			//SprimaryStage.setScene(_mainMenu);
+
 			primaryStage.show();
 
 		} catch (Exception e) {
@@ -64,7 +75,6 @@ public class Main extends Application {
 		launch(args);
 	}
 
-	
 	public void switchScene(Scene newScene) {
 		_thisStage.setScene(newScene);
 	}
@@ -86,7 +96,7 @@ public class Main extends Application {
 			@Override
 			public void handle(ActionEvent actionEvent) {
 
-				generateCreate(); 
+				generateCreate();
 				_thisStage.setScene(_createMenu);
 
 			}
@@ -117,36 +127,42 @@ public class Main extends Application {
 		_thisStage.setScene(_mainMenu);
 	}
 
-	
-	
 	public void clearFolder(String path) {
-		
+
 		// delete all the .txt and .wav files
-		
+
 		try {
 			String cmd = "rm -fv " + path + "/" + "*.txt";
 			ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
 			Process process = pb.start();
-			
-			
+
 			String cmd1 = "rm -fv " + path + "/" + "*.wav";
 			ProcessBuilder pb1 = new ProcessBuilder("bash", "-c", cmd1);
 			Process process1 = pb1.start();
 
 		} catch (Exception e) {
-		
+
 		}
-		
+
 	}
-	
-	
-	
+
 	public void setKeyword(String keyword) {
 		_keyword = keyword;
 	}
-	
+
 	public String getKeyword() {
 		return _keyword;
 	}
+
 	
+	public void GenerateScm() throws IOException {
+		FileWriter fw1 = new FileWriter(_path + "/" + "akl.scm");
+		fw1.write("(voice_akl_nz_jdt_diphone)");
+		fw1.close();
+		
+		FileWriter fw2 = new FileWriter(_path + "/" + "kal.scm");
+		fw2.write("(voice_kal_diphone)");
+		fw2.close();
+		
+	}
 }

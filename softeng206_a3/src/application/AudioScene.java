@@ -110,7 +110,7 @@ public class AudioScene {
 			public void handle(ActionEvent event) {
 				// play the selected text
 
-			} 
+			}
 		});
 
 		Button save = new Button("O K!");
@@ -122,27 +122,28 @@ public class AudioScene {
 					Alert a = new Alert(AlertType.NONE);
 					a.setAlertType(AlertType.ERROR);
 					a.setContentText("Please select/enter some text into the RIGHT text area.....");
-					a.show();	
-				}else {
-					
+					a.show();
+				} else {
+
 					try {
 						// save it as a text file
 						File file = new File(_path + "/" + "SelectedText.txt");
 						BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 						bw.write(textArea2.getText());
 						bw.close();
-					}catch (Exception e) {
-						
+					} catch (Exception e) {
+
 					}
 					// show confirmation
-					Alert alert = new Alert(AlertType.CONFIRMATION, "Want to go to next step?", ButtonType.YES, ButtonType.NO);
+					Alert alert = new Alert(AlertType.CONFIRMATION, "Want to go to next step?", ButtonType.YES,
+							ButtonType.NO);
 					alert.showAndWait();
 					if (alert.getResult() == ButtonType.YES) {
 						// go to next scene
 						CombineMenu();
 					}
 				}
-				
+
 			}
 		});
 
@@ -163,9 +164,18 @@ public class AudioScene {
 		_root.setBottom(BtnContainer);
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public void CombineMenu() {
 
-		
 		// GUI setup
 		_root.getChildren().clear();
 		HBox TopContainer = new HBox(60);
@@ -175,16 +185,16 @@ public class AudioScene {
 		Settings.setMaxWidth(650);
 		TextInputDialog td = new TextInputDialog();
 		td.setHeaderText("Enter a name for this");
-		
+		td.getDialogPane().lookupButton(ButtonType.CANCEL).setDisable(true);
+
 		// list of existing audio files
 		refreshList();
 
 		// choose the speech synthesizers
 		ChoiceBox<String> choiceBox = new ChoiceBox<String>();
-		choiceBox.getItems().add("Default Synthesizer");
-		choiceBox.getItems().add("Choice 2");
-		choiceBox.getItems().add("Choice 3");
-		choiceBox.setValue("Default Synthesizer");
+		choiceBox.getItems().add("Default Voice");
+		choiceBox.getItems().add("AKL accent");
+		choiceBox.setValue("Default Voice");
 		// enter the name for this audio
 
 		Label note = new Label("[ Press 'Ctrl' to select multiple files ]");
@@ -202,20 +212,56 @@ public class AudioScene {
 			@Override
 			public void handle(ActionEvent event) {
 				ObservableList<String> selectedItems = _listView.getSelectionModel().getSelectedItems();
+				String FileNames = "";
+				int count = 0;
 				// must be multiple selection
 				for (String s : selectedItems) {
-
+					FileNames = FileNames + _path + "/" + s + ".wav ";
+					count++;
 				}
-				// combine muliple audio files
-				
-				
-				
-				
-				
-				
-				
-				
-				
+				if (count > 1) {
+					td.showAndWait();
+					String AudioName = td.getEditor().getText();
+
+					// determine whether it is a valid name
+					if (AudioName.isEmpty() || AudioName.trim().isEmpty()) {
+						Alert alert = new Alert(AlertType.ERROR);
+						alert.setTitle("Error Dialog");
+						alert.setContentText("please enter a valid input!");
+						alert.showAndWait();
+					} else {
+
+						if (IsValidName(AudioName)) {
+
+							// combine wav files
+							try {
+								String cmd = "sox " + FileNames + _path + "/" + AudioName + ".wav";
+
+								ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+								Process process = pb.start();
+							} catch (IOException e) {
+
+							}
+							Alert alert = new Alert(AlertType.CONFIRMATION, "The audio " + AudioName + " is made",
+									ButtonType.OK);
+							alert.showAndWait();
+
+						} else {
+							Alert alert = new Alert(AlertType.ERROR);
+							alert.setTitle("Error Dialog");
+							alert.setContentText("please enter another name!");
+							alert.showAndWait();
+						}
+
+					}
+
+				} else {
+					Alert a = new Alert(AlertType.NONE);
+					a.setAlertType(AlertType.ERROR);
+					a.setContentText("Sorry, please select more than one files!");
+					a.show();
+				}
+
 				refreshList();
 			}
 		});
@@ -226,13 +272,14 @@ public class AudioScene {
 			public void handle(ActionEvent event) {
 				// select the one u want to include in your final creation
 				ObservableList<String> selectedItems = _listView.getSelectionModel().getSelectedItems();
-				int count = 0 ;
+				int count = 0;
 				for (String s : selectedItems) {
 					count++;
 				}
-				
+
 				if (count == 1) {
-					Alert alert = new Alert(AlertType.CONFIRMATION, "Want to go to next step?", ButtonType.YES, ButtonType.NO);
+					Alert alert = new Alert(AlertType.CONFIRMATION, "Want to go to next step?", ButtonType.YES,
+							ButtonType.NO);
 					alert.showAndWait();
 					if (alert.getResult() == ButtonType.YES) {
 						// go to next scene
@@ -241,17 +288,16 @@ public class AudioScene {
 						
 						
 						
-						
-						
+
 					}
-					
-				}else {
+
+				} else {
 					Alert a = new Alert(AlertType.NONE);
 					a.setAlertType(AlertType.ERROR);
 					a.setContentText("Sorry, please select one audio to make a creation");
 					a.show();
 				}
-				
+
 			}
 		});
 
@@ -287,35 +333,60 @@ public class AudioScene {
 			@Override
 			public void handle(ActionEvent event) {
 				String synthesizer = choiceBox.getValue();
-				
+
 				td.showAndWait();
 				String AudioName = td.getEditor().getText();
-				
+
 				// determine whether it is a valid name
-				if(AudioName.isEmpty() || AudioName.trim().isEmpty()) {
+				if (AudioName.isEmpty() || AudioName.trim().isEmpty()) {
 					Alert alert = new Alert(AlertType.ERROR);
 					alert.setTitle("Error Dialog");
 					alert.setContentText("please enter a valid input!");
 					alert.showAndWait();
-				}else {
-					
-					if (IsValidName(AudioName) ) {
+				} else {
+
+					if (IsValidName(AudioName)) {
 						// create the audio
-						if ( synthesizer == "Choice 2" ) {
+						if (synthesizer == "AKL accent") {
 							try {
-								String cmd = "espeak -vaf " + _path + "/" + "SelectedText.txt -w " + _path + "/" + AudioName +".wav";
+								String cmd = "text2wave -o " + _path + "/" + AudioName + ".wav " + _path + "/" + "SelectedText.txt -eval " + _path + "/" +"akl.scm"+ " 2> "+ _path + "/" + "error.txt";
 								ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
 								Process process = pb.start();
-							} catch (IOException e) {
+								process.waitFor();
+								if (IsCreated() == false) { // correct audio file is not created 
+									// show alert 
+									Alert alert = new Alert(AlertType.ERROR);
+									alert.setTitle("Error Dialog");
+									alert.setContentText("Please change to the default voice");
+									alert.showAndWait();
+									String cmd1 = "rm " + _path + "/" + AudioName + ".wav";
+									ProcessBuilder pb1 = new ProcessBuilder("bash", "-c", cmd1);
+									Process process1 = pb1.start();
+									
+								}else {
+									
+									// show confirmation
+									Alert alert = new Alert(AlertType.CONFIRMATION, "The audio " + AudioName + " is made",
+											ButtonType.OK);
+									alert.showAndWait();
+								}
+								
+								
+							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							}
-						}else if (synthesizer == "" ) {
+							} 
 							
-						}else {
+							
+							
+							refreshList();
+							
+							
+						} else {
 							// use the default synthesizer
 							try {
-								String cmd = "espeak -f " + _path + "/" + "SelectedText.txt -w " + _path + "/" + AudioName +".wav";
+								// text2wave -eval "(voice_cmu_us_slt_arctic_hts)
+								String cmd = "text2wave -o " + _path + "/" + AudioName + ".wav " + _path + "/" + "SelectedText.txt -eval " + _path + "/" +"kal.scm";
 								ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
 								Process process = pb.start();
 							} catch (IOException e) {
@@ -323,21 +394,25 @@ public class AudioScene {
 								e.printStackTrace();
 							}
 							
+							// show confirmation
+							Alert alert = new Alert(AlertType.CONFIRMATION, "The audio " + AudioName + " is made",
+									ButtonType.OK);
+							alert.showAndWait();
+							
+							refreshList();
 						}
-						
-						// show confirmation 
-						Alert alert = new Alert(AlertType.CONFIRMATION, "The audio " + AudioName + " is made", ButtonType.OK);
-						alert.showAndWait();
 
-					}else {
+						
+
+					} else {
 						Alert alert = new Alert(AlertType.ERROR);
 						alert.setTitle("Error Dialog");
 						alert.setContentText("please enter another name!");
 						alert.showAndWait();
 					}
-		
+
 				}
-				refreshList();
+				
 			}
 		});
 
@@ -374,8 +449,7 @@ public class AudioScene {
 		ObservableList<String> items = FXCollections.observableList(fileNames);
 		_listView.setItems(items);
 	}
-	
-	
+
 	public boolean IsValidName(String InputName) {
 		boolean IsExist = false;
 		List<String> fileNames = getNameList();
@@ -391,6 +465,26 @@ public class AudioScene {
 			return false;
 		}
 
+	}
+	
+	
+	public boolean IsCreated() throws IOException  {
+		
+		String cmd = "cat " + _path + "/" + "error.txt";
+		ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+		Process process = pb.start();
+		InputStream stdout = process.getInputStream();
+		BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+		String line = stdoutBuffered.readLine();
+		String temp = "SIOD ERROR: could not open file /usr/share/festival/dicts/oald/oald_lts_rules.scm";
+
+		if( line == null ) {
+			return true;
+		}else if(line.equals(temp)){
+			return false;	
+		}else {
+			return true;
+		}
 	}
 
 }
