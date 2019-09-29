@@ -17,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -28,6 +29,7 @@ public class Main extends Application {
 	private SearchScene _searchScene;
 	private String _keyword;
 	private String _path;
+	private String _audio;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -37,12 +39,11 @@ public class Main extends Application {
 			// the files created
 			String myDirectory = "206a3_team17";
 			String users_home = System.getProperty("user.home");
-		     _path = users_home.replace("\\", "/") + File.separator + myDirectory;
+			_path = users_home.replace("\\", "/") + File.separator + myDirectory;
 			new File(_path).mkdir();
 
 			// generate .scm file for festival
 			GenerateScm();
-			
 
 			_thisStage = primaryStage;
 			BorderPane root = new BorderPane();
@@ -54,15 +55,7 @@ public class Main extends Application {
 
 			primaryStage.setTitle("VARpedia");
 
-			// ...............
-
-			AudioScene test = new AudioScene(this);
-			Scene testScene = test.getScene();
-			primaryStage.setScene(testScene);
-
-			// ..........
-
-			//SprimaryStage.setScene(_mainMenu);
+			primaryStage.setScene(_mainMenu);
 
 			primaryStage.show();
 
@@ -83,7 +76,11 @@ public class Main extends Application {
 		Label mainMenuInfo = new Label(
 				"Welcome to Group 17's Wiki-Speak Authoring Tool\nPlease select from one of the following options below");
 		mainMenuInfo.setTextAlignment(TextAlignment.CENTER);
+
+		final double MAX_FONT_SIZE = 20.0; // define max font size you need
+		mainMenuInfo.setFont(new Font(MAX_FONT_SIZE));
 		Button viewBtn = new Button("View");
+		viewBtn.setPrefSize(150, 40);
 		viewBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent actionEvent) {
@@ -92,6 +89,7 @@ public class Main extends Application {
 			}
 		});
 		Button createBtn = new Button("Create");
+		createBtn.setPrefSize(150, 40);
 		createBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent actionEvent) {
@@ -101,7 +99,7 @@ public class Main extends Application {
 
 			}
 		});
-		VBox mainMenu = new VBox(4);
+		VBox mainMenu = new VBox(40);
 		mainMenu.setAlignment(Pos.CENTER);
 		mainMenu.getChildren().addAll(mainMenuInfo, viewBtn, createBtn);
 		this._mainMenu = new Scene(mainMenu, 750, 750);
@@ -154,15 +152,22 @@ public class Main extends Application {
 		return _keyword;
 	}
 
-	
+	public void setAudio(String str) {
+		_audio = str;
+	}
+
+	public String getAudio() {
+		return _audio;
+	}
+
 	public void GenerateScm() throws IOException {
 		FileWriter fw1 = new FileWriter(_path + "/" + "akl.scm");
 		fw1.write("(voice_akl_nz_jdt_diphone)");
 		fw1.close();
-		
+
 		FileWriter fw2 = new FileWriter(_path + "/" + "kal.scm");
 		fw2.write("(voice_kal_diphone)");
 		fw2.close();
-		
+
 	}
 }

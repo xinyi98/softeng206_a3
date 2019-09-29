@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -55,6 +56,7 @@ public class SearchScene {
 
 		// add the button "back to main menu"
 		Button BackBtn = new Button("Back To Main Menu");
+		BackBtn.setPrefSize(250, 40);
 		BackBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -65,11 +67,13 @@ public class SearchScene {
 
 		// add the button "make a creation"
 		Button CreateBtn = new Button("Make A Creation Now");
-
+		CreateBtn.setPrefSize(250, 40);
 		// enter the name for search
 		ProgressBar progressBar = new ProgressBar(0);
 		TextInputDialog td = new TextInputDialog();
-		td.setHeaderText("Enter something u want to search");
+		td.setHeaderText("Enter A Keyword");
+		td.getDialogPane().lookupButton(ButtonType.CANCEL).setVisible(false);
+		
 		EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				// show the text input dialog
@@ -85,8 +89,6 @@ public class SearchScene {
 					alert.showAndWait();
 
 				} else {
-					
-
 					
 					_keyword = ToSearch;
 					_stage.setKeyword(_keyword);
@@ -108,7 +110,7 @@ public class SearchScene {
 
 					progressBar.progressProperty().bind(task.progressProperty());
 					root.setCenter(progressBar);
-					progressBar.setPrefWidth(40);
+					progressBar.setPrefWidth(100);
 
 					// when the thread finished its task
 					task.setOnSucceeded((succeededEvent) -> {
@@ -188,8 +190,8 @@ public class SearchScene {
 		ObservableList<String> items = FXCollections.observableList(_fileNames);
 		list.setItems(items);
 		list.setOrientation(Orientation.VERTICAL);
-		list.setPrefWidth(200);
-		list.setPrefHeight(50);
+		list.setPrefWidth(350);
+		list.setPrefHeight(100);
 		HBox hbox = new HBox(list);
 		
 		root.setRight(hbox);

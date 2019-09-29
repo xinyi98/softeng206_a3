@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,6 +31,7 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class AudioScene {
@@ -91,9 +94,10 @@ public class AudioScene {
 
 		}
 		textArea1.setText(_text);
-
+		_text = "";
 		// add the button "back to main menu"
 		Button BackBtn = new Button("Back To Main Menu");
+		BackBtn.setPrefSize(250, 40);
 		BackBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -103,33 +107,44 @@ public class AudioScene {
 			}
 		});
 
-		// add the button "preview" and "save"
-		Button preview = new Button("Preview");
-		preview.setOnAction(new EventHandler<ActionEvent>() {
+		Button clear = new Button("Clear");
+		clear.setPrefSize(150, 40);
+		clear.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				// play the selected text
-
+				textArea2.setText("");
+				_selectedText = "";
 			}
 		});
 
 		Button save = new Button("O K!");
+		save.setPrefSize(150, 40);
 		save.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 
+				String str = textArea2.getText();
+				int words = GetWordCounts(str);
+				
 				if (textArea2.getText().isEmpty() || textArea2.getText().trim().isEmpty()) {
 					Alert a = new Alert(AlertType.NONE);
 					a.setAlertType(AlertType.ERROR);
 					a.setContentText("Please select/enter some text into the RIGHT text area.....");
 					a.show();
-				} else {
+				} else if (words < 10 || words > 40) {
+					
+					Alert a = new Alert(AlertType.NONE);
+					a.setAlertType(AlertType.ERROR);
+					a.setContentText("Please select 10-40 words");
+					a.show();
+					
+				}else {
 
 					try {
 						// save it as a text file
 						File file = new File(_path + "/" + "SelectedText.txt");
 						BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-						bw.write(textArea2.getText());
+						bw.write(textArea2.getText().replaceAll("[\\[\\](){}']", ""));
 						bw.close();
 					} catch (Exception e) {
 
@@ -148,6 +163,7 @@ public class AudioScene {
 		});
 
 		Button add = new Button("Add text");
+		add.setPrefSize(150, 40);
 		add.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -156,30 +172,61 @@ public class AudioScene {
 
 			}
 		});
-		HBox BtnContainer = new HBox(40);
-		BtnContainer.getChildren().addAll(preview, add, save);
+
+		// add the button "preview"
+		Button preview = new Button("Preview");
+		preview.setPrefSize(150, 40);
+		preview.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				// play the selected text
+				String str = textArea2.getText();
+				int words = GetWordCounts(str);
+				
+				if (textArea2.getText().isEmpty() || textArea2.getText().trim().isEmpty()) {
+					Alert a = new Alert(AlertType.NONE);
+					a.setAlertType(AlertType.ERROR);
+					a.setContentText("Please select/enter some text into the RIGHT text area.....");
+					a.show();
+				} else if (words < 10 || words > 40) {
+					
+					Alert a = new Alert(AlertType.NONE);
+					a.setAlertType(AlertType.ERROR);
+					a.setContentText("Please select 10-40 words");
+					a.show();
+					
+				} else {
+					String content = textArea2.getText().replaceAll("[\\[\\](){}']", "");
+
+					try {
+
+						String cmd = "echo " + content + " | festival --tts";
+						ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+						Process process = pb.start();
+
+					} catch (IOException e) {
+
+					}
+
+				}
+
+			}
+		});
+
+		HBox BtnContainer = new HBox(50);
+		BtnContainer.getChildren().addAll(clear, preview, add, save);
 
 		_root.setCenter(textContainer);
 		_root.setTop(BackBtn);
 		_root.setBottom(BtnContainer);
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	public void CombineMenu() {
 
 		// GUI setup
 		_root.getChildren().clear();
 		HBox TopContainer = new HBox(60);
-		HBox BtnContainer = new HBox(40);
+		HBox BtnContainer = new HBox(100);
 		HBox Settings = new HBox(30);
 		Settings.setMaxHeight(400);
 		Settings.setMaxWidth(650);
@@ -199,6 +246,7 @@ public class AudioScene {
 
 		Label note = new Label("[ Press 'Ctrl' to select multiple files ]");
 		Button back = new Button("Back to add more audio files");
+		back.setPrefSize(250, 40);
 		back.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -208,6 +256,7 @@ public class AudioScene {
 		});
 
 		Button combine = new Button("Combine");
+		combine.setPrefSize(150, 40);
 		combine.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -267,6 +316,7 @@ public class AudioScene {
 		});
 
 		Button select = new Button("Select one audio & Go to next step");
+		select.setPrefSize(260, 40);
 		select.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -283,11 +333,8 @@ public class AudioScene {
 					alert.showAndWait();
 					if (alert.getResult() == ButtonType.YES) {
 						// go to next scene
-						
-						
-						
-						
-						
+						_stage.setAudio(selectedItems.get(0));
+					
 
 					}
 
@@ -302,6 +349,7 @@ public class AudioScene {
 		});
 
 		Button delete = new Button("Delete");
+		delete.setPrefSize(150, 40);
 		delete.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -316,13 +364,9 @@ public class AudioScene {
 				}
 
 				for (String s : selectedItems) {
-					try {
-						String cmd = "rm " + _path + "/" + s + ".wav";
-						ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
-						Process process = pb.start();
-					} catch (IOException e) {
-
-					}
+					
+					File file = new File(_path + File.separator + s + ".wav");
+					file.delete();					
 				}
 				refreshList();
 			}
@@ -349,60 +393,57 @@ public class AudioScene {
 						// create the audio
 						if (synthesizer == "AKL accent") {
 							try {
-								String cmd = "text2wave -o " + _path + "/" + AudioName + ".wav " + _path + "/" + "SelectedText.txt -eval " + _path + "/" +"akl.scm"+ " 2> "+ _path + "/" + "error.txt";
+								String cmd = "text2wave -o " + _path + "/" + AudioName + ".wav " + _path + "/"
+										+ "SelectedText.txt -eval " + _path + "/" + "akl.scm" + " 2> " + _path + "/"
+										+ "error.txt";
 								ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
 								Process process = pb.start();
 								process.waitFor();
-								if (IsCreated() == false) { // correct audio file is not created 
-									// show alert 
+								if (IsCreated() == false) { // correct audio file is not created
+									// show alert
 									Alert alert = new Alert(AlertType.ERROR);
 									alert.setTitle("Error Dialog");
-									alert.setContentText("Please change to the default voice");
+									alert.setContentText("[contains unreadabel words]\n change to the default voice\n or\n back to change text");
 									alert.showAndWait();
 									String cmd1 = "rm " + _path + "/" + AudioName + ".wav";
 									ProcessBuilder pb1 = new ProcessBuilder("bash", "-c", cmd1);
 									Process process1 = pb1.start();
-									
-								}else {
-									
+
+								} else {
+
 									// show confirmation
-									Alert alert = new Alert(AlertType.CONFIRMATION, "The audio " + AudioName + " is made",
-											ButtonType.OK);
+									Alert alert = new Alert(AlertType.CONFIRMATION,
+											"The audio " + AudioName + " is made", ButtonType.OK);
 									alert.showAndWait();
 								}
-								
-								
+
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							} 
-							
-							
-							
+							}
+
 							refreshList();
-							
-							
+
 						} else {
 							// use the default synthesizer
 							try {
 								// text2wave -eval "(voice_cmu_us_slt_arctic_hts)
-								String cmd = "text2wave -o " + _path + "/" + AudioName + ".wav " + _path + "/" + "SelectedText.txt -eval " + _path + "/" +"kal.scm";
+								String cmd = "text2wave -o " + _path + "/" + AudioName + ".wav " + _path + "/"
+										+ "SelectedText.txt -eval " + _path + "/" + "kal.scm";
 								ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
 								Process process = pb.start();
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							
+
 							// show confirmation
 							Alert alert = new Alert(AlertType.CONFIRMATION, "The audio " + AudioName + " is made",
 									ButtonType.OK);
 							alert.showAndWait();
-							
+
 							refreshList();
 						}
-
-						
 
 					} else {
 						Alert alert = new Alert(AlertType.ERROR);
@@ -412,7 +453,7 @@ public class AudioScene {
 					}
 
 				}
-				
+
 			}
 		});
 
@@ -466,10 +507,9 @@ public class AudioScene {
 		}
 
 	}
-	
-	
-	public boolean IsCreated() throws IOException  {
-		
+
+	public boolean IsCreated() throws IOException {
+
 		String cmd = "cat " + _path + "/" + "error.txt";
 		ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
 		Process process = pb.start();
@@ -478,13 +518,28 @@ public class AudioScene {
 		String line = stdoutBuffered.readLine();
 		String temp = "SIOD ERROR: could not open file /usr/share/festival/dicts/oald/oald_lts_rules.scm";
 
-		if( line == null ) {
+		if (line == null) {
 			return true;
-		}else if(line.equals(temp)){
-			return false;	
-		}else {
+		} else if (line.equals(temp)) {
+			return false;
+		} else {
 			return true;
 		}
+	}
+
+	public int GetWordCounts(String str) {
+		 int count=0;  
+         char ch[]= new char[str.length()];     
+         for(int i=0;i<str.length();i++)  
+         {  
+             ch[i]= str.charAt(i);  
+             if( ((i>0)&&(ch[i]!=' ')&&(ch[i-1]==' ')) || ((ch[0]!=' ')&&(i==0)) )  {
+            	 count++;  
+             }
+                
+         }  
+    
+		return count;
 	}
 
 }
